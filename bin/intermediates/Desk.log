@@ -1,11 +1,7 @@
 ﻿  Main.cpp
   Network.cpp
   ScreenViewer.cpp
-  Создание кода
-  0 of 787 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
-  Создание кода завершено
-  Desk.vcxproj -> C:\Users\egorc\Desktop\Desk\bin\Release\Desk.exe
+  Создание кода...
+  Desk.vcxproj -> C:\Users\egorc\Desktop\Desk\bin\Debug\Desk.exe
   "pwsh.exe" не является внутренней или внешней
   командой, исполняемой программой или пакетным файлом.

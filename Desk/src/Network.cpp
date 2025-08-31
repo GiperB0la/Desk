@@ -34,9 +34,10 @@ Network::~Network()
     WSACleanup();
 }
 
-void Network::start(const std::string& arg, const std::string& ip_recipient, int port_recipient)
+void Network::start(const std::string& arg, const std::string& ip_recipient_frame, const std::string& ip_recipient_event, int port_recipient)
 {
-    this->ip_recipient = ip_recipient;
+    this->ip_recipient_frame = ip_recipient_frame;
+    this->ip_recipient_event = ip_recipient_event;
     this->port_recipient = port_recipient;
 
     startReceiving();
@@ -68,7 +69,7 @@ bool Network::sendFrame(const std::vector<uint8_t>& frame)
     sockaddr_in remoteAddr{};
     remoteAddr.sin_family = AF_INET;
     remoteAddr.sin_port = htons(port_recipient);
-    if (inet_pton(AF_INET, ip_recipient.c_str(), &remoteAddr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, ip_recipient_frame.c_str(), &remoteAddr.sin_addr) <= 0) {
         return false;
     }
 
@@ -103,6 +104,56 @@ bool Network::sendFrame(const std::vector<uint8_t>& frame)
 
     frameId++;
     return true;
+}
+
+bool Network::send_event(EventType event, const EventPayload& evPayload)
+{
+    sockaddr_in remoteAddr{};
+    remoteAddr.sin_family = AF_INET;
+    remoteAddr.sin_port = htons(port_recipient);
+    if (inet_pton(AF_INET, ip_recipient_event.c_str(), &remoteAddr.sin_addr) <= 0) {
+        return false;
+    }
+
+    std::vector<uint8_t> packet;
+    packet.push_back(static_cast<uint8_t>(0xBB));
+    packet.push_back(static_cast<uint8_t>(event));
+
+    std::vector<uint8_t> payload;
+
+    std::visit([&](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, MouseMoveData> || std::is_same_v<T, MouseClickData>) {
+            payload.push_back(static_cast<uint8_t>(arg.x & 0xFF));
+            payload.push_back(static_cast<uint8_t>((arg.x >> 8) & 0xFF));
+            payload.push_back(static_cast<uint8_t>(arg.y & 0xFF));
+            payload.push_back(static_cast<uint8_t>((arg.y >> 8) & 0xFF));
+        }
+        else if constexpr (std::is_same_v<T, MouseWheelData>) {
+            payload.push_back(static_cast<uint8_t>(arg.x & 0xFF));
+            payload.push_back(static_cast<uint8_t>((arg.x >> 8) & 0xFF));
+            payload.push_back(static_cast<uint8_t>(arg.y & 0xFF));
+            payload.push_back(static_cast<uint8_t>((arg.y >> 8) & 0xFF));
+            payload.push_back(static_cast<uint8_t>(arg.delta & 0xFF));
+            payload.push_back(static_cast<uint8_t>((arg.delta >> 8) & 0xFF));
+        }
+        else if constexpr (std::is_same_v<T, KeyPressData>) {
+            payload.push_back(static_cast<uint8_t>(arg.keycode & 0xFF));
+            payload.push_back(static_cast<uint8_t>((arg.keycode >> 8) & 0xFF));
+        }
+        }, evPayload);
+
+    packet.push_back(static_cast<uint8_t>(payload.size()));
+    packet.insert(packet.end(), payload.begin(), payload.end());
+
+    int sent = sendto(socket_,
+        reinterpret_cast<const char*>(packet.data()),
+        static_cast<int>(packet.size()),
+        0,
+        reinterpret_cast<sockaddr*>(&remoteAddr),
+        sizeof(remoteAddr));
+
+    return sent != SOCKET_ERROR;
 }
 
 void Network::startReceiving()
@@ -153,7 +204,7 @@ void Network::receiveLoop()
 
                 handleChunk(header, dataPtr, dataSize, senderAddr);
             }
-            else {
+            else if (firstByte == 0xBB) {
                 handleEvent(buffer.data(), received, senderAddr);
             }
         }
@@ -198,8 +249,8 @@ void Network::handleEvent(const uint8_t* data, size_t size, const sockaddr_in& s
 {
     if (size < 2) return;
 
-    EventType event = static_cast<EventType>(data[0]);
-    uint8_t payloadSize = data[1];
+    EventType event = static_cast<EventType>(data[1]);
+    uint8_t payloadSize = data[2];
 
     if (size < 2 + payloadSize) return;
 
@@ -208,8 +259,8 @@ void Network::handleEvent(const uint8_t* data, size_t size, const sockaddr_in& s
     switch (event) {
     case EventType::MouseMove: {
         if (payloadSize != 4) break;
-        int x = data[2] | (data[3] << 8);
-        int y = data[4] | (data[5] << 8);
+        int x = data[3] | (data[4] << 8);
+        int y = data[5] | (data[6] << 8);
         payload = MouseMoveData{ x, y };
         commitEvent(event, payload);
         break;
@@ -217,8 +268,8 @@ void Network::handleEvent(const uint8_t* data, size_t size, const sockaddr_in& s
 
     case EventType::MouseLeftClick: {
         if (payloadSize != 4) break;
-        int x = data[2] | (data[3] << 8);
-        int y = data[4] | (data[5] << 8);
+        int x = data[3] | (data[4] << 8);
+        int y = data[5] | (data[6] << 8);
         payload = MouseClickData{ x, y };
         commitEvent(event, payload);
         break;
@@ -226,8 +277,8 @@ void Network::handleEvent(const uint8_t* data, size_t size, const sockaddr_in& s
 
     case EventType::MouseRightClick: {
         if (payloadSize != 4) break;
-        int x = data[2] | (data[3] << 8);
-        int y = data[4] | (data[5] << 8);
+        int x = data[3] | (data[4] << 8);
+        int y = data[5] | (data[6] << 8);
         payload = MouseClickData{ x, y };
         commitEvent(event, payload);
         break;
@@ -235,8 +286,8 @@ void Network::handleEvent(const uint8_t* data, size_t size, const sockaddr_in& s
 
     case EventType::MouseWheel: {
         if (payloadSize != 6) break;
-        int x = data[2] | (data[3] << 8);
-        int y = data[4] | (data[5] << 8);
+        int x = data[3] | (data[4] << 8);
+        int y = data[5] | (data[6] << 8);
         int delta = data[6] | (data[7] << 8);
         payload = MouseWheelData{ x, y, delta };
         commitEvent(event, payload);
@@ -245,7 +296,7 @@ void Network::handleEvent(const uint8_t* data, size_t size, const sockaddr_in& s
 
     case EventType::KeyPress: {
         if (payloadSize != 2) break;
-        int keycode = data[2] | (data[3] << 8);
+        int keycode = data[3] | (data[4] << 8);
         payload = KeyPressData{ keycode };
         commitEvent(event, payload);
         break;
@@ -313,53 +364,4 @@ std::optional<std::vector<uint8_t>> Network::get_frame()
     auto f = std::move(frame_queue_.front());
     frame_queue_.pop();
     return f;
-}
-
-bool Network::send_event(EventType event, const EventPayload& evPayload)
-{
-    sockaddr_in remoteAddr{};
-    remoteAddr.sin_family = AF_INET;
-    remoteAddr.sin_port = htons(port_recipient);
-    if (inet_pton(AF_INET, ip_recipient.c_str(), &remoteAddr.sin_addr) <= 0) {
-        return false;
-    }
-
-    std::vector<uint8_t> packet;
-    packet.push_back(static_cast<uint8_t>(event));
-
-    std::vector<uint8_t> payload;
-
-    std::visit([&](auto&& arg) {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, MouseMoveData> || std::is_same_v<T, MouseClickData>) {
-            payload.push_back(static_cast<uint8_t>(arg.x & 0xFF));
-            payload.push_back(static_cast<uint8_t>((arg.x >> 8) & 0xFF));
-            payload.push_back(static_cast<uint8_t>(arg.y & 0xFF));
-            payload.push_back(static_cast<uint8_t>((arg.y >> 8) & 0xFF));
-        }
-        else if constexpr (std::is_same_v<T, MouseWheelData>) {
-            payload.push_back(static_cast<uint8_t>(arg.x & 0xFF));
-            payload.push_back(static_cast<uint8_t>((arg.x >> 8) & 0xFF));
-            payload.push_back(static_cast<uint8_t>(arg.y & 0xFF));
-            payload.push_back(static_cast<uint8_t>((arg.y >> 8) & 0xFF));
-            payload.push_back(static_cast<uint8_t>(arg.delta & 0xFF));
-            payload.push_back(static_cast<uint8_t>((arg.delta >> 8) & 0xFF));
-        }
-        else if constexpr (std::is_same_v<T, KeyPressData>) {
-            payload.push_back(static_cast<uint8_t>(arg.keycode & 0xFF));
-            payload.push_back(static_cast<uint8_t>((arg.keycode >> 8) & 0xFF));
-        }
-        }, evPayload);
-
-    packet.push_back(static_cast<uint8_t>(payload.size()));
-    packet.insert(packet.end(), payload.begin(), payload.end());
-
-    int sent = sendto(socket_,
-        reinterpret_cast<const char*>(packet.data()),
-        static_cast<int>(packet.size()),
-        0,
-        reinterpret_cast<sockaddr*>(&remoteAddr),
-        sizeof(remoteAddr));
-
-    return sent != SOCKET_ERROR;
 }

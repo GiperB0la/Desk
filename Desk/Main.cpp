@@ -8,7 +8,11 @@ int main()
 {
     int port;
     int port_recipient;
-    std::string ip_recipient = "192.168.31.206";
+    std::string ip_recipient_frame = "192.168.31.206";
+    std::string ip_recipient_event = "192.168.31.206";
+    // std::string ip_recipient_event = "192.168.31.102";
+    // std::string ip_recipient = "192.168.31.102";
+    // std::string ip_recipient = "192.168.31.187";
     std::string arg;
     std::cout << "> ";
     std::cin >> arg;
@@ -26,7 +30,7 @@ int main()
 
     try {
         Network client(port);
-        client.start(arg, ip_recipient, port_recipient);
+        client.start(arg, ip_recipient_frame, ip_recipient_event, port_recipient);
     }
     catch (const std::exception& ex) {
         std::cerr << "Error: " << ex.what() << std::endl;

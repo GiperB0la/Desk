@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\egorc\Desktop\Desk\bin\Release\Desk.exe</FullPath>
+      <FullPath>C:\Users\egorc\Desktop\Desk\bin\Debug\Desk.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

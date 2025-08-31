@@ -44,7 +44,7 @@ public:
     ~Network();
 
 public:
-    void start(const std::string& arg, const std::string& ip_recipient, int port_recipient);
+    void start(const std::string& arg, const std::string& ip_recipient_frame, const std::string& ip_recipient_event, int port_recipient);
     bool send_event(EventType event, const EventPayload& payload);
 
 private:
@@ -67,6 +67,7 @@ private:
     std::mutex frame_mutex_;
     std::queue<std::vector<uint8_t>> frame_queue_;
 
-    std::string ip_recipient;
+    std::string ip_recipient_frame;
+    std::string ip_recipient_event;
     int port_recipient;
 };
