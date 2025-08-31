@@ -4,7 +4,7 @@
 #include <string>
 
 
-int main()
+int main(int argc, char* argv[])
 {
     int port;
     int port_recipient;
@@ -13,6 +13,12 @@ int main()
     // std::string ip_recipient_event = "192.168.31.102";
     // std::string ip_recipient = "192.168.31.102";
     // std::string ip_recipient = "192.168.31.187";
+
+    if (argc >= 2) {
+        ip_recipient_frame = argv[1];
+        ip_recipient_event = (argc >= 3) ? argv[2] : argv[1];
+    }
+
     std::string arg;
     std::cout << "> ";
     std::cin >> arg;
