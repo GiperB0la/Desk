@@ -291,6 +291,14 @@ void Desk::handle_events_buttons(const sf::Event& event_)
                 }
             }
             else if (state_ == WindowState::Session) {
+                if (button.get_category() == static_cast<size_t>(CategoryButton::Close)) {
+                    window_.close();
+                    click_ = true;
+                }
+                else if (button.get_category() == static_cast<size_t>(CategoryButton::RollUp)) {
+                    ShowWindow(window_.getSystemHandle(), SW_MINIMIZE);
+                    click_ = true;
+                }
                 if (button.get_category() == static_cast<size_t>(CategoryButton::Stop)) {
                     if (thread_.joinable()) {
                         if (network_) network_->stop();
