@@ -5,10 +5,9 @@
 One client takes screenshots of its desktop, encodes them into **JPEG**, and sends them to another client.  
 The second client receives these frames and displays them in an **SFML window** in real time.  
 
-But the magic doesn’t stop there:  
-- when the second client’s user moves the mouse, clicks, or types, those events are sent back through the network;  
-- the first client receives them and reproduces the actions using **WinAPI**;  
-- the result is a fully functional **remote desktop control**, similar to AnyDesk or RDP.  
+At the same time, user input (mouse and keyboard events) from the second client is sent back through the network.  
+The first client receives these events and reproduces them with **WinAPI**, turning the app into a fully functional  
+**remote desktop solution** — both screen sharing and full control are always enabled.  
 
 ---
 
@@ -17,9 +16,7 @@ But the magic doesn’t stop there:
 - 🖥️ User-friendly UI for configuring IPs and ports  
 - ⚡ Frame transmission over **UDP** for minimal latency  
 - 🔗 Simple client ↔ client architecture, where roles are defined at startup  
-- 🎥 Two modes:  
-  - **Screen Demonstration** — screen sharing only  
-  - **Full Control** — remote mouse and keyboard control  
+- 🎮 Combined **screen streaming + remote control** in one mode (no switching required)  
 
 ---
 
