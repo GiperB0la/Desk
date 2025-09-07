@@ -139,6 +139,7 @@
     <ClInclude Include="include\ScreenManager.hpp" />
     <ClInclude Include="include\ScreenViewer.hpp" />
     <ClInclude Include="include\Widgets.hpp" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -146,6 +147,12 @@
     <ClCompile Include="src\Network.cpp" />
     <ClCompile Include="src\ScreenViewer.cpp" />
     <ClCompile Include="src\Widgets.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GiperbolaDesk.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,7 @@
   ScreenViewer.cpp
   Widgets.cpp
   Создание кода...
+  LINK : не найден или не выполнена сборка C:\Users\egorc\Desktop\GiperbolaDesk\bin\Debug\GiperbolaDesk.exe при последней инкрементной компоновке; выполняется полная компоновка
   GiperbolaDesk.vcxproj -> C:\Users\egorc\Desktop\GiperbolaDesk\bin\Debug\GiperbolaDesk.exe
   "pwsh.exe" не является внутренней или внешней
   командой, исполняемой программой или пакетным файлом.
