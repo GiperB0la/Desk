@@ -2,8 +2,15 @@
 #include "../include/ScreenViewer.hpp"
 
 
-Network::Network(unsigned short localPort)
-    : running_(false)
+Network::Network()
+    : running_(false) { }
+
+Network::~Network()
+{
+    stop();
+}
+
+void Network::init(const std::string& local_ip, unsigned int local_port)
 {
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -17,8 +24,12 @@ Network::Network(unsigned short localPort)
     }
 
     localAddr_.sin_family = AF_INET;
-    localAddr_.sin_port = htons(localPort);
-    localAddr_.sin_addr.s_addr = INADDR_ANY;
+    localAddr_.sin_port = htons(local_port);
+    if (InetPtonA(AF_INET, local_ip.c_str(), &localAddr_.sin_addr) != 1) {
+        closesocket(socket_);
+        WSACleanup();
+        throw std::runtime_error("Invalid IP address");
+    }
 
     if (bind(socket_, (sockaddr*)&localAddr_, sizeof(localAddr_)) == SOCKET_ERROR) {
         closesocket(socket_);
@@ -27,41 +38,41 @@ Network::Network(unsigned short localPort)
     }
 }
 
-Network::~Network()
+void Network::start(bool demonstration, const std::string& local_ip, unsigned int local_port,
+    const std::string& ip_recipient, unsigned int port_recipient)
 {
-    stopReceiving();
-    closesocket(socket_);
-    WSACleanup();
-}
-
-void Network::start(const std::string& arg, const std::string& ip_recipient_frame, const std::string& ip_recipient_event, int port_recipient)
-{
-    this->ip_recipient_frame = ip_recipient_frame;
-    this->ip_recipient_event = ip_recipient_event;
+    this->local_ip = local_ip;
+    this->local_port = local_port;
+    this->ip_recipient = ip_recipient;
     this->port_recipient = port_recipient;
 
+    init(local_ip, local_port);
     startReceiving();
 
-    if (arg != "2") {
-        ScreenViewer viewer_(1920, 1080, "Screen");
+    if (!demonstration) {
+        ScreenViewer viewer_;
+        while (viewer_.is_open() && running_) {
+            if (!viewer_.poll_events(this)) {
+                break;
+            }
 
-        while (true) {
-            while (viewer_.is_open()) {
-                if (!viewer_.poll_events(this)) {
-                    break;
-                }
-
-                if (auto frame = get_frame()) {
-                    viewer_.display_frame(frame);
-                }
+            if (auto frame = get_frame()) {
+                viewer_.display_frame(frame);
             }
         }
     }
     else {
-        while (true) {
+        while (running_) {
             sendFrame(ScreenManager::capture_screen_as_jpg());
         }
     }
+}
+
+void Network::stop()
+{
+    stopReceiving();
+    closesocket(socket_);
+    WSACleanup();
 }
 
 bool Network::sendFrame(const std::vector<uint8_t>& frame)
@@ -69,7 +80,7 @@ bool Network::sendFrame(const std::vector<uint8_t>& frame)
     sockaddr_in remoteAddr{};
     remoteAddr.sin_family = AF_INET;
     remoteAddr.sin_port = htons(port_recipient);
-    if (inet_pton(AF_INET, ip_recipient_frame.c_str(), &remoteAddr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, ip_recipient.c_str(), &remoteAddr.sin_addr) <= 0) {
         return false;
     }
 
@@ -111,7 +122,7 @@ bool Network::send_event(EventType event, const EventPayload& evPayload)
     sockaddr_in remoteAddr{};
     remoteAddr.sin_family = AF_INET;
     remoteAddr.sin_port = htons(port_recipient);
-    if (inet_pton(AF_INET, ip_recipient_event.c_str(), &remoteAddr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, ip_recipient.c_str(), &remoteAddr.sin_addr) <= 0) {
         return false;
     }
 
@@ -163,10 +174,17 @@ void Network::startReceiving()
     recvThread_ = std::thread(&Network::receiveLoop, this);
 }
 
-void Network::stopReceiving() 
+void Network::stopReceiving()
 {
     if (!running_) return;
     running_ = false;
+
+    if (socket_ != INVALID_SOCKET) {
+        shutdown(socket_, SD_BOTH);
+        closesocket(socket_);
+        socket_ = INVALID_SOCKET;
+    }
+
     if (recvThread_.joinable())
         recvThread_.join();
 }

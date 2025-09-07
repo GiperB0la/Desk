@@ -9,7 +9,7 @@
 class ScreenViewer
 {
 public:
-    ScreenViewer(unsigned width, unsigned height, const std::string& title);
+    ScreenViewer();
 
 public:
     bool is_open() const;

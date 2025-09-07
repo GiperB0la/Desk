@@ -40,14 +40,17 @@ constexpr size_t CHUNK_DATA_SIZE = 1400;
 class Network
 {
 public:
-    Network(unsigned short localPort);
+    Network();
     ~Network();
 
 public:
-    void start(const std::string& arg, const std::string& ip_recipient_frame, const std::string& ip_recipient_event, int port_recipient);
+    void start(bool demonstration, const std::string& local_ip, unsigned int local_port,
+        const std::string& ip_recipient, unsigned int port_recipient);
+    void stop();
     bool send_event(EventType event, const EventPayload& payload);
 
 private:
+    void init(const std::string& local_ip, unsigned int local_port);
     bool sendFrame(const std::vector<uint8_t>& frame);
     void startReceiving();
     void stopReceiving();
@@ -67,7 +70,6 @@ private:
     std::mutex frame_mutex_;
     std::queue<std::vector<uint8_t>> frame_queue_;
 
-    std::string ip_recipient_frame;
-    std::string ip_recipient_event;
-    int port_recipient;
+    std::string local_ip, ip_recipient;
+    unsigned int local_port, port_recipient;
 };

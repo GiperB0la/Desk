@@ -1,9 +1,11 @@
 #include "../include/ScreenViewer.hpp"
 
 
-ScreenViewer::ScreenViewer(unsigned width, unsigned height, const std::string& title)
-    : window_(sf::VideoMode(width, height), title)
+ScreenViewer::ScreenViewer()
 {
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    window_.create(desktop, "GiperbolaDesk", sf::Style::Default);
+    window_.setPosition({ 0, 0 });
     window_.setFramerateLimit(60);
 }
 

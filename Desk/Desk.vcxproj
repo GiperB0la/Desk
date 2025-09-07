@@ -134,14 +134,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="src\Desk.cpp" />
     <ClCompile Include="src\Network.cpp" />
     <ClCompile Include="src\ScreenViewer.cpp" />
+    <ClCompile Include="src\Widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Desk.hpp" />
     <ClInclude Include="include\Network.hpp" />
     <ClInclude Include="include\Protocol.hpp" />
     <ClInclude Include="include\ScreenManager.hpp" />
     <ClInclude Include="include\ScreenViewer.hpp" />
+    <ClInclude Include="include\Widgets.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
