@@ -109,6 +109,8 @@ bool Network::sendFrame(const std::vector<uint8_t>& frame)
             sizeof(remoteAddr));
 
         if (sent == SOCKET_ERROR) {
+            int err = WSAGetLastError();
+            std::cerr << "sendto failed, error: " << err << std::endl;
             return false;
         }
     }
@@ -368,7 +370,7 @@ void Network::commitEvent(EventType event, const EventPayload& payload)
 
 void Network::pushFrame(std::vector<uint8_t>&& frame)
 {
-    std::lock_guard<std::mutex> lock(frame_mutex_);
+    // std::lock_guard<std::mutex> lock(frame_mutex_);
     frame_queue_.push(std::move(frame));
     if (frame_queue_.size() > 5) {
         frame_queue_.pop();
@@ -377,7 +379,7 @@ void Network::pushFrame(std::vector<uint8_t>&& frame)
 
 std::optional<std::vector<uint8_t>> Network::get_frame()
 {
-    std::lock_guard<std::mutex> lock(frame_mutex_);
+    // std::lock_guard<std::mutex> lock(frame_mutex_);
     if (frame_queue_.empty()) return std::nullopt;
     auto f = std::move(frame_queue_.front());
     frame_queue_.pop();
