@@ -1,10 +1,9 @@
 ﻿  Main.cpp
   Desk.cpp
-  Создание кода
-  5 of 1339 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
-  Создание кода завершено
-  GiperbolaDesk.vcxproj -> C:\Users\egorc\Desktop\GiperbolaDesk\bin\Release\GiperbolaDesk.exe
+  Network.cpp
+  ScreenViewer.cpp
+  Widgets.cpp
+  Создание кода...
+  GiperbolaDesk.vcxproj -> D:\Cpp\Projects\GiperbolaDesk\bin\Debug\GiperbolaDesk.exe
   "pwsh.exe" не является внутренней или внешней
   командой, исполняемой программой или пакетным файлом.
