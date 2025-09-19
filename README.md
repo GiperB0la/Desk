@@ -31,3 +31,28 @@ The first client receives these events and reproduces them with **WinAPI**, turn
   <img src="https://raw.githubusercontent.com/GiperB0la/Desk/main/Screens/Screen3.jpg" alt="Screen3" width="45%">
   <img src="https://raw.githubusercontent.com/GiperB0la/Desk/main/Screens/Screen4.jpg" alt="Screen4" width="45%">
 </p>
+
+---
+
+## 🛠️ Build
+
+### 🔹 Prerequisites
+- **CMake ≥ 3.16**  
+- **C++17 compiler** (MSVC, g++, clang++)  
+- **SFML 2.6.2** ([download](https://www.sfml-dev.org/download/sfml/2.6.2/))
+- **OpenCV** (install via [vcpkg](https://github.com/microsoft/vcpkg) or from [official site](https://opencv.org/releases/))
+
+---
+
+```powershell
+# Clone project
+git clone https://github.com/GiperB0la/GiperbolaDesk.git
+cd GiperbolaDesk
+mkdir build && cd build
+
+# Configure
+cmake .. -DCMAKE_TOOLCHAIN_FILE="path/to/vcpkg/scripts/buildsystems/vcpkg.cmake" `-DSFML_DIR="path/to/SFML/lib/cmake/SFML"
+
+# Build (Release version)
+cmake --build . --config Release
+```
