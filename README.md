@@ -27,11 +27,6 @@ The first client receives these events and reproduces them with **WinAPI**, turn
   <img src="https://raw.githubusercontent.com/GiperB0la/Desk/main/Screens/Screen2.jpg" alt="Screen2" width="45%">
 </p>
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/GiperB0la/Desk/main/Screens/Screen3.jpg" alt="Screen3" width="45%">
-  <img src="https://raw.githubusercontent.com/GiperB0la/Desk/main/Screens/Screen4.jpg" alt="Screen4" width="45%">
-</p>
-
 ---
 
 ## 🛠️ Build
