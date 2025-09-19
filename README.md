@@ -1,4 +1,4 @@
-# 🚀 GiperbolaDesk — Remote Desktop over UDP
+# 🖥️ GiperbolaDesk — Remote Desktop over UDP
 
 **GiperbolaDesk** is a lightweight remote desktop application built on top of **UDP**.  
 
