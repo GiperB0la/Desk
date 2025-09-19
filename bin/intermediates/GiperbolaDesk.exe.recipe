@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\Cpp\Projects\GiperbolaDesk\bin\Debug\GiperbolaDesk.exe</FullPath>
+      <FullPath>D:\Cpp\Projects\GiperbolaDesk\bin\Release\GiperbolaDesk.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
